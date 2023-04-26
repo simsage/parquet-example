@@ -27,3 +27,23 @@ Simple, run `document-select-example.py` to get a view of what is inside a SimSa
 ```bash
 python3 document-select-example.py
 ```
+
+## example output
+
+|id |full_path                                                                             |source     |size in bytes |acls|very_similar ids|identical ids                      |
+|---|--------------------------------------------------------------------------------------|-----------|------|----|------------|-----------------------------------------------|
+|64 |https://simsage.ai/                                                                   |simsage web|21304 |    |            |                                               |
+|65 |https://simsage.ai/_assets/svg/footer-logo-agritech.svg                               |simsage web|15728 |    |            |                                               |
+|66 |https://simsage.ai/_assets/svg/footer-logo-eu.svg                                     |simsage web|863006|    |            |                                               |
+|67 |https://simsage.ai/_assets/img/graphics/g-cloud-logo.webp                             |simsage web|43116 |    |            |                                               |
+|68 |https://simsage.ai/_assets/img/graphics/cyber-essentials-logo.png                     |simsage web|43311 |    |            |                                               |
+|69 |https://simsage.ai/_assets/img/graphics/iso-27001-logo.jpg                            |simsage web|48585 |    |            |                                               |
+|70 |https://simsage.ai/_assets/svg/logo-full.svg                                          |simsage web|4578  |    |            |                                               |
+|71 |https://simsage.ai/_assets/img/graphics/why-4.png                                     |simsage web|1473  |    |            |                                               |
+|72 |https://simsage.ai/_assets/img/graphics/why-3.png                                     |simsage web|5468  |    |            |                                               |
+|73 |https://simsage.ai/_assets/img/graphics/why-2.png                                     |simsage web|1407  |    |            |                                               |
+|74 |https://simsage.ai/_assets/img/graphics/why-1.png                                     |simsage web|5357  |    |            |                                               |
+|75 |https://simsage.ai/_assets/svg/graphics/uc-find-send-100.jpg                          |simsage web|148264|    |            |98,76,77,78,79,80,81,82,83,88,89,90,91,92,93,94|
+|76 |https://simsage.ai/_assets/svg/graphics/uc-improve-service-100.jpg                    |simsage web|86241 |    |            |98,75,77,78,79,80,81,82,83,88,89,90,91,92,93,94|
+|77 |https://simsage.ai/_assets/svg/graphics/uc-quickly-and-easily-100.jpg                 |simsage web|102602|    |            |98,75,76,78,79,80,81,82,83,88,89,90,91,92,93,94|
+
