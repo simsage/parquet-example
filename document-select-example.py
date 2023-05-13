@@ -1,14 +1,19 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # python3 -m pip install pyspark
 
 import pyspark
 from pyspark.sql import SparkSession
+import sys
+
+if len(sys.argv) != 2:
+    print("takes one parameter: /path/to/file.parquet")
+    exit(1)
+file_name = sys.argv[1]
 
 spark = SparkSession.builder.appName("query-test").getOrCreate()
 # this is the document-inventory parquet file
-parDF1 = spark.read.parquet("demo_knowledge_base-summary-2023-4-26.parquet")
-
+parDF1 = spark.read.parquet(file_name)
 parDF1.createOrReplaceTempView("parquetTable")
 
 # this prints out the schema (i.e. the fields) of the above parquet file

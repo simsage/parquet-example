@@ -1,12 +1,18 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import pyspark
 from pyspark.sql import SparkSession
+import sys
+
+if len(sys.argv) != 2:
+    print("takes one parameter: /path/to/file.parquet")
+    exit(1)
+file_name = sys.argv[1]
 
 # python3 -m pip install pyspark
 
 spark = SparkSession.builder.appName("query-test").getOrCreate()
-parDF1 = spark.read.parquet("index-demo_knowledge_base-summary-2023-1-16.parquet")
+parDF1 = spark.read.parquet(file_name)
 
 parDF1.createOrReplaceTempView("parquetTable")
 

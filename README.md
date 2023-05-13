@@ -21,11 +21,22 @@ install `pySpark`
 python3 -m pip install pyspark
 ```
 
+## converting your parquet file to a csv file
+run `parquet-to-csv.py` to convert the entire contents of your parquet file to a `csv` file with header.
+This takes an `output folder` where the utility will create one or more `csv` files depending on the size
+of your parquet file.
+
+```bash
+# to convert your parquet file at /path/to/file.parquet
+python3 parquet-to-csv.py /path/to/file.parquet /path/to/output/folder/
+```
+
 ## run the sample code
 Simple, run `document-select-example.py` to get a view of what is inside a SimSage parquet document export.
 
 ```bash
-python3 document-select-example.py
+# to view part of your parquet file at /path/to/file.parquet
+python3 document-select-example.py /path/to/file.parquet
 ```
 
 ## example output
