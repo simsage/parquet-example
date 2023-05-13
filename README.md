@@ -29,6 +29,9 @@ of your parquet file.
 ```bash
 # to convert your parquet file at /path/to/file.parquet
 python3 parquet-to-csv.py /path/to/file.parquet /path/to/output/folder/
+
+# using the data included
+python3 parquet-to-csv.py index-demo_knowledge_base-summary-2023-1-16.parquet out/
 ```
 
 ## run the sample code
