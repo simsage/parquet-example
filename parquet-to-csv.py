@@ -6,6 +6,7 @@
 
 import pyspark
 from pyspark.sql import SparkSession
+from pyspark import SparkConf, SparkContext
 import sys
 
 if len(sys.argv) != 3:
@@ -15,7 +16,8 @@ if len(sys.argv) != 3:
 in_file_name = sys.argv[1]
 out_file_name = sys.argv[2]
 
-spark = SparkSession.builder.appName("query-test").getOrCreate()
+spark = SparkSession.builder.appName("query-test").config("spark.sql.parquet.columnarReaderBatchSize", "256").getOrCreate()
+
 df = spark.read.parquet(in_file_name)
 df.createOrReplaceTempView("parquetTable")
 df.write.option("header", True).csv(out_file_name)
