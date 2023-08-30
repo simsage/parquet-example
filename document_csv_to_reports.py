@@ -34,7 +34,7 @@ pii_dictionary = dict()
 sec_dictionary = dict()
 
 counter = 0
-with open('sjic-file-store.csv', 'rt') as reader:
+with open(input_file, 'rt') as reader:
     for l in  csv.reader(reader, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True):
         
         counter += 1
