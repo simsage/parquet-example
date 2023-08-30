@@ -101,16 +101,18 @@ with open(input_file, 'rt') as reader:
 
         # gather information by document extension type
         if len(extn) == 0:
-            extn = 'unknow'
+            extn = 'unknown'
+        if len(sub_type) == 0:
+            sub_type = "unknown"
         if extn in type_dictionary:
             existing = type_dictionary[extn]
         else:
             existing = {"sub_type_set": {}, "byte_size": 0, "oldest": 0, "newest": 0}
-        if len(sub_type) > 0:
-            if sub_type in existing["sub_type_set"]:
-                existing["sub_type_set"][sub_type] += 1
-            else:
-                existing["sub_type_set"][sub_type] = 1
+        if sub_type in existing["sub_type_set"]:
+            existing["sub_type_set"][sub_type] += 1
+        else:
+            existing["sub_type_set"][sub_type] = 1
+
         if created > 0 and last_mod > 0:
             oldest = created
             newest = last_mod
