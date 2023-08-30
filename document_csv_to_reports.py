@@ -2,6 +2,7 @@
 
 import csv
 import sys
+import datetime
 
 # convert a document export CSV to three content reports for a high level overview of the data
 
@@ -216,7 +217,9 @@ with open(output_prefix + 'type_report_1.csv', 'wt') as writer:
         for sub in sub_type_set:
             count = sub_type_set[sub]
             total += count
-        writer.write("{},{},{},{},{}\n".format(t, byte_size, oldest, newest, str(total)))
+        oldest_dt = datetime.datetime.fromtimestamp(oldest / 1000)
+        newest_dt = datetime.datetime.fromtimestamp(newest / 1000)
+        writer.write("{},{},{},{},{}\n".format(t, byte_size, oldest_dt, newest_dt, str(total)))
 
 with open(output_prefix + 'type_report_2.csv', 'wt') as writer:
     for t in type_dictionary:
