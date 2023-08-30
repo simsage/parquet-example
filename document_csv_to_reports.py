@@ -10,7 +10,7 @@ col_type = 6
 col_extn = 7
 col_created = 8
 col_lastmod = 9
-col_conthash = 10
+col_cont_hash = 10
 col_size = 11
 col_acls = 12
 col_similar = 13
@@ -103,7 +103,7 @@ with open(input_file, 'rt') as reader:
             email = int(l[col_email])
 
         acls = l[col_acls].split(",")
-        content_hash = l[col_conthash]
+        content_hash = l[col_cont_hash]
         similar = l[col_similar].split(",")
 
         # gather information by document extension type
