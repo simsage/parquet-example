@@ -34,6 +34,7 @@ if len(parts) == 2:
     output_prefix = parts[0]
 output_prefix += "-"
 
+location_dictionary = dict()
 type_dictionary = dict()
 pii_dictionary = dict()
 sec_dictionary = dict()
@@ -65,6 +66,11 @@ with open(input_file, 'rt') as reader:
 
         item_id = l[0] # the id of this item
         item_url = l[1]
+        path = '/'.join(item_url.split("/")[0:-1])
+        # record the different paths, skipping zip files
+        if len(path) > 0 and path not in location_dictionary and ":::" not in path:
+            location_dictionary[path] = True
+
         url_lookup[item_id] = item_url  # id -> url
         extn = l[col_extn]
         sub_type = l[col_type]
@@ -248,3 +254,15 @@ with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
             url_1 = url_lookup[ids[0]]
             url_2 = url_lookup[ids[1]]
             writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
+
+with open(output_prefix + 'path_report.csv', 'wt') as writer:
+    path_list = []
+    for item in location_dictionary:
+        path_list.append(item)
+    path_list.sort()
+    for item in path_list:
+        writer.write("{}\n".format(item))
+
+
+
+
