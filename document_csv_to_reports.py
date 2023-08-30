@@ -13,9 +13,13 @@ col_conthash = 10
 col_size = 11
 col_acls = 12
 col_similar = 13
-col_ccard = 17
-col_person = 21
-col_nin = 22
+
+# pii
+col_ccard = 0
+col_person = 0
+col_nin = 0
+col_ssn = 0
+col_email = 0
 
 if len(sys.argv) != 2:
     print("convert a document csv file to a series of four reports")
@@ -32,6 +36,9 @@ output_prefix += "-"
 type_dictionary = dict()
 pii_dictionary = dict()
 sec_dictionary = dict()
+sim_dictionary = dict()
+identical_dictionary = dict()
+url_lookup = dict()
 
 counter = 0
 with open(input_file, 'rt') as reader:
@@ -39,8 +46,25 @@ with open(input_file, 'rt') as reader:
         
         counter += 1
         if counter == 1:
+            # process header
+            header_counter = 0
+            for item in l:
+                if item == "credit_card_count":
+                    col_ccard = header_counter
+                elif item == "nin_count":
+                    col_nin = header_counter
+                elif item == "ssn_count":
+                    col_ssn = header_counter
+                elif item == "person_count":
+                    col_person = header_counter
+                elif item == "email_count":
+                    col_email = header_counter
+                header_counter += 1
             continue
 
+        item_id = l[0] # the id of this item
+        item_url = l[1]
+        url_lookup[item_id] = item_url  # id -> url
         extn = l[col_extn]
         sub_type = l[col_type]
         c_created = l[col_created]
@@ -52,9 +76,25 @@ with open(input_file, 'rt') as reader:
         if len(c_lastmod) > 0:
             last_mod = int(c_lastmod)
         byte_size = int(l[col_size])
-        ccard = int(l[col_ccard])
-        person = int(l[col_person])
-        nin = int(l[col_nin])
+
+        # for PII collection
+        ccard = 0
+        person = 0
+        nin = 0
+        ssn = 0
+        email = 0
+
+        if col_ccard > 0:
+            ccard = int(l[col_ccard])
+        if col_person > 0:
+            person = int(l[col_person])
+        if col_nin > 0:
+            nin = int(l[col_nin])
+        if col_ssn > 0:
+            ssn = int(l[col_ssn])
+        if col_email > 0:
+            email = int(l[col_email])
+
         acls = l[col_acls].split(",")
         content_hash = l[col_conthash]
         similar = l[col_similar].split(",")
@@ -83,21 +123,32 @@ with open(input_file, 'rt') as reader:
 
         # gather pii
         if person > 0:
-            if "person" in pii_dictionary:
-                pii_dictionary["person"] += person
+            if "names of people" in pii_dictionary:
+                pii_dictionary["names of people"] += person
             else:
-                pii_dictionary["person"] = person
+                pii_dictionary["names of people"] = person
         if nin > 0:
-            if "nin" in pii_dictionary:
-                pii_dictionary["nin"] += nin
+            if "national insurance numbers" in pii_dictionary:
+                pii_dictionary["national insurance numbers"] += nin
             else:
-                pii_dictionary["nin"] = nin
+                pii_dictionary["national insurance numbers"] = nin
         if ccard > 0:
-            if "ccard" in pii_dictionary:
-                pii_dictionary["ccard"] += ccard
+            if "credit cards" in pii_dictionary:
+                pii_dictionary["credit cards"] += ccard
             else:
-                pii_dictionary["ccard"] = ccard
+                pii_dictionary["credit cards"] = ccard
+        if ssn > 0:
+            if "social security numbers" in pii_dictionary:
+                pii_dictionary["social security numbers"] += ssn
+            else:
+                pii_dictionary["social security numbers"] = ssn
+        if email > 0:
+            if "email addresses" in pii_dictionary:
+                pii_dictionary["email addresses"] += email
+            else:
+                pii_dictionary["email addresses"] = email
 
+        # gather security data (acl distributions)
         for hv in acls:
             parts = hv.split(":")
             if len(parts) == 2:
@@ -110,8 +161,47 @@ with open(input_file, 'rt') as reader:
                 else:
                     sec_dictionary[access][who] = 1
 
+        # gather similar documents
+        if len(similar) > 0 and len(similar[0]) > 0:
+            for item in similar:
+                parts = item.split("@")
+                similar_list = [item_id]
+                if len(parts) == 2:
+                    similar_id = parts[0]
+                    percentage = parts[1]
+                    # take the smallest of the two ids
+                    first_id = item_id
+                    second_id = similar_id
+                    if second_id < first_id:
+                        first_id = similar_id
+                        second_id = item_id
+                    key = "{}:{}".format(first_id, second_id)
+                    sim_dictionary[key] = percentage
+
+        if len(content_hash) > 0:
+            if content_hash not in identical_dictionary:
+                identical_dictionary[content_hash] = []
+            identical_dictionary[content_hash].append(item_id)
+
+# set up the identical items inside the sim dictionary
+for item in identical_dictionary:
+    values = identical_dictionary[item]
+    if len(values) > 1:
+        for i in values:
+            for j in values:
+                if i == j:
+                    continue
+                first_id = i
+                second_id = j
+                if second_id < first_id:
+                    first_id = j
+                    second_id = i
+                key = "{}:{}".format(first_id, second_id)
+                sim_dictionary[key] = '1.0'
 
 # output the data so it can be processed
+
+# a report of the file-extensions to size / newest / oldest and counts
 with open(output_prefix + 'type_report_1.csv', 'wt') as writer:
     for t in type_dictionary:
         sub_type = type_dictionary[t]
@@ -145,3 +235,11 @@ with open(output_prefix + 'sec_report.csv', 'wt') as writer:
             count = sec_set[who]
             writer.write("{},{},{}\n".format(who, str(count), sec))
 
+with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
+    for sim in sim_dictionary:
+        ids = sim.split(":")
+        if len(ids) == 2:
+            percentage = sim_dictionary[sim]
+            url_1 = url_lookup[ids[0]]
+            url_2 = url_lookup[ids[1]]
+            writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
