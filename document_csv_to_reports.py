@@ -4,6 +4,8 @@ import csv
 import sys
 import datetime
 
+csv.field_size_limit(sys.maxsize)
+
 # convert a document export CSV to three content reports for a high level overview of the data
 
 col_type = 6
@@ -75,6 +77,8 @@ with open(input_file, 'rt') as reader:
         extn = l[col_extn]
         sub_type = l[col_type]
         c_created = l[col_created]
+        if c_created == "created":
+            continue
         c_lastmod = l[col_lastmod]
         created = 0
         if len(c_created) > 0:
