@@ -43,6 +43,7 @@ sec_dictionary = dict()
 sim_dictionary = dict()
 identical_dictionary = dict()
 url_lookup = dict()
+duplicates_seen = dict()
 
 counter = 0
 with open(input_file, 'rt') as reader:
@@ -189,7 +190,9 @@ with open(input_file, 'rt') as reader:
                         first_id = similar_id
                         second_id = item_id
                     key = "{}:{}".format(first_id, second_id)
-                    sim_dictionary[key] = percentage
+                    if key not in duplicates_seen:
+                        duplicates_seen[key] = True
+                        sim_dictionary[key] = percentage
 
         if len(content_hash) > 0:
             if content_hash not in identical_dictionary:
@@ -210,7 +213,9 @@ for item in identical_dictionary:
                     first_id = j
                     second_id = i
                 key = "{}:{}".format(first_id, second_id)
-                sim_dictionary[key] = '1.0'
+                if key not in duplicates_seen:
+                    duplicates_seen[key] = True
+                    sim_dictionary[key] = '1.0'
 
 # output the data so it can be processed
 
