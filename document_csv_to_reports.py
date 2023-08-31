@@ -254,6 +254,7 @@ with open(output_prefix + 'sec_report.csv', 'wt') as writer:
             count = sec_set[who]
             writer.write("{},{},{}\n".format(who, str(count), sec))
 
+duplicates_seen = dict()
 with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
     for sim in sim_dictionary:
         ids = sim.split(":")
@@ -261,7 +262,9 @@ with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
             percentage = sim_dictionary[sim]
             url_1 = url_lookup[ids[0]]
             url_2 = url_lookup[ids[1]]
-            writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
+            if url_1 not in duplicates_seen:
+                duplicates_seen[url_1] = True
+                writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
 
 with open(output_prefix + 'path_report.csv', 'wt') as writer:
     path_list = []
