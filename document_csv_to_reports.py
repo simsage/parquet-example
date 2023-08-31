@@ -43,7 +43,6 @@ sec_dictionary = dict()
 sim_dictionary = dict()
 identical_dictionary = dict()
 url_lookup = dict()
-duplicates_seen = dict()
 
 counter = 0
 with open(input_file, 'rt') as reader:
@@ -184,14 +183,13 @@ with open(input_file, 'rt') as reader:
                     similar_id = parts[0]
                     percentage = parts[1]
                     # take the smallest of the two ids
-                    first_id = item_id
-                    second_id = similar_id
+                    first_id = int(item_id)
+                    second_id = int(similar_id)
                     if second_id < first_id:
-                        first_id = similar_id
-                        second_id = item_id
-                    key = "{}:{}".format(first_id, second_id)
-                    if key not in duplicates_seen:
-                        duplicates_seen[key] = True
+                        first_id = int(similar_id)
+                        second_id = int(item_id)
+                    key = "{}:{}".format(str(first_id), str(second_id))
+                    if key not in sim_dictionary and first_id != second_id:
                         sim_dictionary[key] = percentage
 
         if len(content_hash) > 0:
@@ -200,6 +198,7 @@ with open(input_file, 'rt') as reader:
             identical_dictionary[content_hash].append(item_id)
 
 # set up the identical items inside the sim dictionary
+duplicates_seen = dict()
 for item in identical_dictionary:
     values = identical_dictionary[item]
     if len(values) > 1:
@@ -207,13 +206,13 @@ for item in identical_dictionary:
             for j in values:
                 if i == j:
                     continue
-                first_id = i
-                second_id = j
+                first_id = int(i)
+                second_id = int(j)
                 if second_id < first_id:
-                    first_id = j
-                    second_id = i
-                key = "{}:{}".format(first_id, second_id)
-                if key not in duplicates_seen:
+                    first_id = int(j)
+                    second_id = int(i)
+                key = "{}:{}".format(str(first_id), str(second_id))
+                if key not in duplicates_seen and first_id != second_id:
                     duplicates_seen[key] = True
                     sim_dictionary[key] = '1.0'
 
