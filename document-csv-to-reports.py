@@ -186,6 +186,7 @@ for item in identical_dictionary:
 
 # a report of the file-extensions to size / newest / oldest and counts
 with open(output_prefix + 'type_report_1.csv', 'wt') as writer:
+    writer.write("file extension,size in bytes,oldest date-time,newest date-time,number of items\n")
     for t in type_dictionary:
         sub_type = type_dictionary[t]
         byte_size = sub_type["byte_size"]
@@ -197,11 +198,12 @@ with open(output_prefix + 'type_report_1.csv', 'wt') as writer:
         for sub in sub_type_set:
             count = sub_type_set[sub]
             total += count
-        oldest_dt = datetime.datetime.fromtimestamp(oldest / 1000)
-        newest_dt = datetime.datetime.fromtimestamp(newest / 1000)
+        oldest_dt = str(datetime.datetime.fromtimestamp(oldest / 1000)).split(".")[0]
+        newest_dt = str(datetime.datetime.fromtimestamp(newest / 1000)).split(".")[0]
         writer.write("{},{},{},{},{}\n".format(t, byte_size, oldest_dt, newest_dt, str(total)))
 
 with open(output_prefix + 'type_report_2.csv', 'wt') as writer:
+    writer.write("file extension,exact type,number of items\n")
     for t in type_dictionary:
         sub_type = type_dictionary[t]
         sub_type_set = sub_type["sub_type_set"]
@@ -209,11 +211,13 @@ with open(output_prefix + 'type_report_2.csv', 'wt') as writer:
             writer.write("{},\"{}\",{}\n".format(t, sub, str(count)))
 
 with open(output_prefix + 'pii_report.csv', 'wt') as writer:
+    writer.write("sensitive category,number of items\n")
     for pii in pii_dictionary:
         count = pii_dictionary[pii]
         writer.write("{},{}\n".format(pii, str(count)))
 
 with open(output_prefix + 'sec_report.csv', 'wt') as writer:
+    writer.write("who,number of items,access\n")
     for sec in sec_dictionary:
         sec_set = sec_dictionary[sec]
         for who in sec_set:
@@ -222,6 +226,7 @@ with open(output_prefix + 'sec_report.csv', 'wt') as writer:
 
 duplicates_seen = dict()
 with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
+    writer.write("item 1,item 2,similarity\n")
     for sim in sim_dictionary:
         ids = sim.split(":")
         if len(ids) == 2:
