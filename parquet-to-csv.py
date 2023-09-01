@@ -17,6 +17,7 @@ in_file_name = sys.argv[1]
 out_file_name = sys.argv[2]
 
 spark = SparkSession.builder.appName("query-test").config("spark.sql.parquet.columnarReaderBatchSize", "256").getOrCreate()
+spark.conf.set("spark.sql.debug.maxToStringFields", 1000)
 
 df = spark.read.parquet(in_file_name)
 df.createOrReplaceTempView("parquetTable")
