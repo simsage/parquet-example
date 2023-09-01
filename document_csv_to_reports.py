@@ -230,6 +230,7 @@ with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
             url_2 = url_lookup[ids[1]]
             if url_1 not in duplicates_seen:
                 duplicates_seen[url_1] = True
+                duplicates_seen[url_2] = True
                 writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
 
 with open(output_prefix + 'path_report.csv', 'wt') as writer:
