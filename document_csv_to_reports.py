@@ -18,11 +18,18 @@ col_acls = 12
 col_similar = 13
 
 # pii
-col_ccard = 0
-col_person = 0
-col_nin = 0
-col_ssn = 0
-col_email = 0
+pii_data = {'credit_card_count': {'col': 0, 'name': 'credit cards'},
+            'ssn_count': {'col': 0, 'name': 'social security numbers'},
+            'nin_count': {'col': 0, 'name': 'national insurance numbers'},
+            'email_count': {'col': 0, 'name': 'email addresses'},
+            'person_count': {'col': 0, 'name': 'names of people'},
+            'ip_address_count': {'col': 0, 'name': 'ip addresses'},
+            'mac_address_count': {'col': 0, 'name': 'mac addresses'},
+            'address_count': {'col': 0, 'name': 'addresses'},
+            'zip_count': {'col': 0, 'name': 'zip codes'},
+            'postcode_count': {'col': 0, 'name': 'uk postcodes'},
+            'secret_count': {'col': 0, 'name': 'api secrets'}}
+
 
 if len(sys.argv) != 2:
     print("convert a document csv file to a series of four reports")
@@ -53,16 +60,8 @@ with open(input_file, 'rt') as reader:
             # process header
             header_counter = 0
             for item in l:
-                if item == "credit_card_count":
-                    col_ccard = header_counter
-                elif item == "nin_count":
-                    col_nin = header_counter
-                elif item == "ssn_count":
-                    col_ssn = header_counter
-                elif item == "person_count":
-                    col_person = header_counter
-                elif item == "email_count":
-                    col_email = header_counter
+                if item in pii_data:
+                    pii_data[item]['col'] = header_counter
                 header_counter += 1
             continue
 
@@ -88,23 +87,17 @@ with open(input_file, 'rt') as reader:
             last_mod = int(c_lastmod)
         byte_size = int(l[col_size])
 
-        # for PII collection
-        ccard = 0
-        person = 0
-        nin = 0
-        ssn = 0
-        email = 0
-
-        if col_ccard > 0:
-            ccard = int(l[col_ccard])
-        if col_person > 0:
-            person = int(l[col_person])
-        if col_nin > 0:
-            nin = int(l[col_nin])
-        if col_ssn > 0:
-            ssn = int(l[col_ssn])
-        if col_email > 0:
-            email = int(l[col_email])
+        # for PII collection, gather data
+        for key in pii_data:
+            col = pii_data[key]['col']
+            name = pii_data[key]['name']
+            if col > 0:
+                value = int(l[col])
+                if value > 0:
+                    if name in pii_dictionary:
+                        pii_dictionary[name] += value
+                    else:
+                        pii_dictionary[name] = value
 
         acls = l[col_acls].split(",")
         content_hash = l[col_cont_hash]
@@ -133,33 +126,6 @@ with open(input_file, 'rt') as reader:
                 existing["newest"] = newest
         existing["byte_size"] += byte_size
         type_dictionary[extn] = existing
-
-        # gather pii
-        if person > 0:
-            if "names of people" in pii_dictionary:
-                pii_dictionary["names of people"] += person
-            else:
-                pii_dictionary["names of people"] = person
-        if nin > 0:
-            if "national insurance numbers" in pii_dictionary:
-                pii_dictionary["national insurance numbers"] += nin
-            else:
-                pii_dictionary["national insurance numbers"] = nin
-        if ccard > 0:
-            if "credit cards" in pii_dictionary:
-                pii_dictionary["credit cards"] += ccard
-            else:
-                pii_dictionary["credit cards"] = ccard
-        if ssn > 0:
-            if "social security numbers" in pii_dictionary:
-                pii_dictionary["social security numbers"] += ssn
-            else:
-                pii_dictionary["social security numbers"] = ssn
-        if email > 0:
-            if "email addresses" in pii_dictionary:
-                pii_dictionary["email addresses"] += email
-            else:
-                pii_dictionary["email addresses"] = email
 
         # gather security data (acl distributions)
         for hv in acls:
