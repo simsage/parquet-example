@@ -226,12 +226,13 @@ with open(output_prefix + 'similarity_report.csv', 'wt') as writer:
         ids = sim.split(":")
         if len(ids) == 2:
             percentage = sim_dictionary[sim]
-            url_1 = url_lookup[ids[0]]
-            url_2 = url_lookup[ids[1]]
-            if url_1 not in duplicates_seen:
-                duplicates_seen[url_1] = True
-                duplicates_seen[url_2] = True
-                writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
+            if ids[1] in url_lookup and ids[0] in url_lookup:
+                url_1 = url_lookup[ids[0]]
+                url_2 = url_lookup[ids[1]]
+                if url_1 not in duplicates_seen:
+                    duplicates_seen[url_1] = True
+                    duplicates_seen[url_2] = True
+                    writer.write("{},{},{}\n".format(url_1, url_2, str(percentage)))
 
 with open(output_prefix + 'path_report.csv', 'wt') as writer:
     path_list = []
