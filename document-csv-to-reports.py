@@ -81,23 +81,35 @@ with open(input_file, 'rt') as reader:
         c_lastmod = l[col_lastmod]
         created = 0
         if len(c_created) > 0:
-            created = int(c_created)
+            try:
+                created = int(c_created)
+            except ValueError:
+                continue
         last_mod = 0
         if len(c_lastmod) > 0:
-            last_mod = int(c_lastmod)
-        byte_size = int(l[col_size])
+            try:
+                last_mod = int(c_lastmod)
+            except ValueError:
+                continue
+        try:
+            byte_size = int(l[col_size])
+        except ValueError:
+            continue
 
         # for PII collection, gather data
         for key in pii_data:
             col = pii_data[key]['col']
             name = pii_data[key]['name']
             if col > 0:
-                value = int(l[col])
-                if value > 0:
-                    if name in pii_dictionary:
-                        pii_dictionary[name] += value
-                    else:
-                        pii_dictionary[name] = value
+                try:
+                    value = int(l[col])
+                    if value > 0:
+                        if name in pii_dictionary:
+                            pii_dictionary[name] += value
+                        else:
+                            pii_dictionary[name] = value
+                except ValueError:
+                    pass
 
         acls = l[col_acls].split(",")
         content_hash = l[col_cont_hash]
