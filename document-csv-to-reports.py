@@ -237,10 +237,14 @@ with open(output_prefix + 'pii_report.csv', 'wt') as writer:
         count = pii_dictionary[pii]
         writer.write("{},{}\n".format(pii, str(count)))
     writer.write("\n\n")
+    writer.write("sensitive category,list of up to one thousand documents where these can be found\n")
     # and output the documents of each category
     for pii in pii_document_map:
         document_list = pii_document_map[pii]
-        writer.write("{},{}\n".format(pii, '|'.join(document_list)))
+        if len(document_list) > 1000:
+            writer.write("{},{}\n".format(pii, ','.join(document_list[:1000])))
+        else:
+            writer.write("{},{}\n".format(pii, ','.join(document_list)))
 
 with open(output_prefix + 'sec_report.csv', 'wt') as writer:
     writer.write("who,number of items,access\n")
