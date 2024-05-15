@@ -30,6 +30,7 @@ pii_data = {'credit_card_count': {'col': 0, 'name': 'credit cards'},
             'postcode_count': {'col': 0, 'name': 'uk postcodes'},
             'secret_count': {'col': 0, 'name': 'api secrets'}}
 
+pii_document_map = {}
 
 if len(sys.argv) != 2:
     print("convert a document csv file to a series of four reports")
@@ -65,7 +66,7 @@ with open(input_file, 'rt') as reader:
                 header_counter += 1
             continue
 
-        item_id = l[0] # the id of this item
+        item_id = l[0] # the SimSage id of this item
         item_url = l[1]
         path = '/'.join(item_url.split("/")[0:-1])
         # record the different paths, skipping zip files
@@ -108,6 +109,13 @@ with open(input_file, 'rt') as reader:
                             pii_dictionary[name] += value
                         else:
                             pii_dictionary[name] = value
+
+                        # and collect WHAT document has this data
+                        if name in pii_document_map:
+                            pii_document_map[name].append(item_url)
+                        else:
+                            pii_document_map[name] = [item_url]
+
                 except ValueError:
                     pass
 
@@ -214,19 +222,25 @@ with open(output_prefix + 'type_report_1.csv', 'wt') as writer:
         newest_dt = str(datetime.datetime.fromtimestamp(newest / 1000)).split(".")[0]
         writer.write("{},{},{},{},{}\n".format(t, byte_size, oldest_dt, newest_dt, str(total)))
 
-with open(output_prefix + 'type_report_2.csv', 'wt') as writer:
-    writer.write("file extension,exact type,number of items\n")
-    for t in type_dictionary:
-        sub_type = type_dictionary[t]
-        sub_type_set = sub_type["sub_type_set"]
-        for sub in sub_type_set:
-            writer.write("{},\"{}\",{}\n".format(t, sub, str(count)))
+# with open(output_prefix + 'type_report_2.csv', 'wt') as writer:
+#     writer.write("file extension,exact type,number of items\n")
+#     for t in type_dictionary:
+#         sub_type = type_dictionary[t]
+#         sub_type_set = sub_type["sub_type_set"]
+#         for sub in sub_type_set:
+#             writer.write("{},\"{}\",{}\n".format(t, sub, str(count)))
 
+# write personal information leakage report
 with open(output_prefix + 'pii_report.csv', 'wt') as writer:
     writer.write("sensitive category,number of items\n")
     for pii in pii_dictionary:
         count = pii_dictionary[pii]
         writer.write("{},{}\n".format(pii, str(count)))
+    writer.write("\n\n")
+    # and output the documents of each category
+    for pii in pii_document_map:
+        document_list = pii_document_map[pii]
+        writer.write("{},{}\n".format(pii, '|'.join(document_list)))
 
 with open(output_prefix + 'sec_report.csv', 'wt') as writer:
     writer.write("who,number of items,access\n")
@@ -258,7 +272,4 @@ with open(output_prefix + 'path_report.csv', 'wt') as writer:
     path_list.sort()
     for item in path_list:
         writer.write("{}\n".format(item))
-
-
-
 
