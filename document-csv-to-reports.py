@@ -100,7 +100,7 @@ with open(input_file, 'rt') as reader:
         for key in pii_data:
             col = pii_data[key]['col']
             name = pii_data[key]['name']
-            if col > 0:
+            if col > 0 and col < len(l):
                 try:
                     value = int(l[col])
                     if value > 0:
