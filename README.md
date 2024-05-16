@@ -8,13 +8,7 @@ Parquet is a file format for big data.  Apache Spark is a powerful technology th
 Create a virtual-environment (good practise but not required) or a folder for your project.
 Then install pySpark like so (using python 3) inside this project folder.
 
-this section is optional
-```bash
-# optional: create a virtual environment called 'venv' in linux to isolate the installation and packages
-virtualenv -p python3 venv
-# then activate the virtual environment
-source venv/bin/activate
-```
+#### this section is optional
 
 install `pySpark`
 ```bash
@@ -42,7 +36,31 @@ python3 parquet-to-csv.py /path/to/file.parquet /path/to/output/folder/
 python3 parquet-to-csv.py index-demo_knowledge_base-summary-2023-1-16.parquet out/
 ```
 
-## run the sample code
+## generate content analysis reports from the CSV file
+Make sure you put all CSV files into one large one.
+
+```bash
+# for instance, change into the `out` folder where the CSV files were generated
+cd out
+
+# find the parts of the CSV file, and cat them all into one file
+cat part-00000-01ed070f-b1d0-4d5e-a3c1-7825ffc21e40-c*.csv > my-file.csv
+
+# go back into the root of this repository afterwards
+cd ..
+```
+
+Now you're ready to run the csv report generator
+
+```bash
+# generate the reports, this might take some time depending on size
+python3 document-csv-to-reports.py out/my-file.csv
+
+# the resulting reports are written into the `out` folder as
+# my-file-pii_report.csv, my-file-similarity_report.csv, etc.
+```
+
+## run the document-select SQL-99 query example
 Simple, run `document-select-example.py` to get a view of what is inside a SimSage parquet document export.
 
 ```bash
