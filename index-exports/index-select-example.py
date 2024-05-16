@@ -2,9 +2,8 @@
 
 #
 # open and query an INVENTORY INDEX export parquet file - this file is more for language
-# and content analysis of indexes.  This is file and export are only intended for SimSage
-# internal use.  The kind of analysis is useful for content and index analysis by the SimSage
-# team
+# and content analysis of indexes.  This file is intended for SimSage internal use.
+# The kind of analysis is useful for content and index analysis by the SimSage team.
 #
 
 
