@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# small demo file for opening and querying an
+
 import pyspark
 from pyspark.sql import SparkSession
 import sys

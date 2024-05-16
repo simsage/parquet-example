@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-# python3 -m pip install pyspark
+#
+# small demo sample for opening a parquet spark file and performing a SQL-99 query on it
+#
 
 import pyspark
 from pyspark.sql import SparkSession

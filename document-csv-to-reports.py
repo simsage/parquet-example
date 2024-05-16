@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+#
+# this script will generate a security, PII (personal identifiable information), similarity, and
+# various file-type vs count and byte-size reports from a CSV file
+#
+# 1. use SimSage to generate a DOCUMENT INVENTORY parquet file from your admin UX in the `inventory` section
+# 2. wait for this file to generate, then download it to your own environment
+# 3. use `parquet-to-csv.py` to convert this parquet file to a series of CSV files (depending on size they split)
+# 4. if there are more than one CSV file, "glue" them together again by appending them to each other
+# 5. then use this utility to read through the resulting CSV file and generate the reports
+#    these reports are written to the same directory/folder the CSV is located in
+#
+
 import csv
 import sys
 import datetime

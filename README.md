@@ -21,6 +21,14 @@ install `pySpark`
 python3 -m pip install pyspark
 ```
 
+or using a virtual environment
+
+```bash
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## converting your parquet file to a csv file
 run `parquet-to-csv.py` to convert the entire contents of your parquet file to a `csv` file with header.
 This takes an `output folder` where the utility will create one or more `csv` files depending on the size

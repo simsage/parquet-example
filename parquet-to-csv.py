@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-# python3 -m pip install pyspark
+#
+# this script converts a spark parquet file to a series of CSV files (depending on size it splits)
+#
+# 1. use SimSage to generate a DOCUMENT INVENTORY parquet file from your admin UX in the `inventory` section
+# 2. wait for this file to generate, then download it to your own environment
+# 3. use this `parquet-to-csv.py` file to your parquet file to a series of CSV files
+#
 
 # convert a parquet file to a CSV file with header
 
