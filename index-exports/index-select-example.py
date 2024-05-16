@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-# small demo file for opening and querying an
+#
+# open and query an INVENTORY INDEX export parquet file - this file is more for language
+# and content analysis of indexes.  This is file and export are only intended for SimSage
+# internal use.  The kind of analysis is useful for content and index analysis by the SimSage
+# team
+#
+
 
 import pyspark
 from pyspark.sql import SparkSession
