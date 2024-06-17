@@ -24,66 +24,38 @@ pip install -r requirements.txt
 ```
 
 ## converting your parquet file to a csv file
-run `parquet-to-csv.py` to convert the entire contents of your parquet file to a `csv` file with header.
-This takes an `output folder` where the utility will create one or more `csv` files depending on the size
-of your parquet file.
+run `generate_reports.py` to convert the entire contents of your parquet file to a `csv` file with reporting.
+This takes two parameters, a `customer_name` that is used for the name of the reports and a temporary folder for writing into,
+and the `/path/to/parquet-file.parquet` location of your parquet file.
 
 ```bash
 # to convert your parquet file at /path/to/file.parquet
-python3 parquet-to-csv.py /path/to/file.parquet /path/to/output/folder/
+python3 generate_reports.py customer /path/to/file.parquet
 
 # using the data included
-python3 parquet-to-csv.py index-demo_knowledge_base-summary-2023-1-16.parquet out/
+python3 generate_reports.py demo index-demo_knowledge_base-summary-2023-1-16.parquet
 ```
 
-## generate content analysis reports from the CSV file
-Make sure you put all CSV files into one large one.
+#### The reports
 
-```bash
-# for instance, change into the `out` folder where the CSV files were generated
-cd out
+The report files are as follows (here `customer` is the name you used above for generating these files)
 
-# find the parts of the CSV file, and cat them all into one file
-cat part-00000-01ed070f-b1d0-4d5e-a3c1-7825ffc21e40-c*.csv > my-file.csv
+|filename                        | description                                                        |
+|--------------------------------|--------------------------------------------------------------------|
+|customer.csv                    | the raw csv output of the parquet file                             |
+|customer-path_report.csv        | the different paths found inside all the files                     |
+|customer-pii_report.csv         | Personally Identifiable Information inside your files              |
+|customer-sec_report.csv         | Security / ACLs grouped for each file                              |
+|customer-similarity_report.csv  | Similar and identical files grouped                                |
+|customer-type_report_1.csv      | Different file types with sizes, counts, and oldest / newest dates |
 
-# go back into the root of this repository afterwards
-cd ..
+
+## Spark Raw Query
+
 ```
+## run the SQL-99 query example
+Simple, run `query_example.py` to get a view of what is inside a SimSage parquet document export.
 
-Now you're ready to run the csv report generator
-
-```bash
-# generate the reports, this might take some time depending on size
-python3 document-csv-to-reports.py out/my-file.csv
-
-# the resulting reports are written into the `out` folder as
-# my-file-pii_report.csv, my-file-similarity_report.csv, etc.
-```
-
-## run the document-select SQL-99 query example
-Simple, run `document-select-example.py` to get a view of what is inside a SimSage parquet document export.
-
-```bash
 # to view part of your parquet file at /path/to/file.parquet
-python3 document-select-example.py /path/to/file.parquet
+python3 query_example.py /path/to/file.parquet
 ```
-
-## example output
-
-|id |full_path                                                                             |source     |size in bytes |acls|very_similar ids|identical ids                      |
-|---|--------------------------------------------------------------------------------------|-----------|------|----|------------|-----------------------------------------------|
-|64 |https://simsage.ai/                                                                   |simsage web|21304 |    |            |                                               |
-|65 |https://simsage.ai/_assets/svg/footer-logo-agritech.svg                               |simsage web|15728 |    |            |                                               |
-|66 |https://simsage.ai/_assets/svg/footer-logo-eu.svg                                     |simsage web|863006|    |            |                                               |
-|67 |https://simsage.ai/_assets/img/graphics/g-cloud-logo.webp                             |simsage web|43116 |    |            |                                               |
-|68 |https://simsage.ai/_assets/img/graphics/cyber-essentials-logo.png                     |simsage web|43311 |    |            |                                               |
-|69 |https://simsage.ai/_assets/img/graphics/iso-27001-logo.jpg                            |simsage web|48585 |    |            |                                               |
-|70 |https://simsage.ai/_assets/svg/logo-full.svg                                          |simsage web|4578  |    |            |                                               |
-|71 |https://simsage.ai/_assets/img/graphics/why-4.png                                     |simsage web|1473  |    |            |                                               |
-|72 |https://simsage.ai/_assets/img/graphics/why-3.png                                     |simsage web|5468  |    |            |                                               |
-|73 |https://simsage.ai/_assets/img/graphics/why-2.png                                     |simsage web|1407  |    |            |                                               |
-|74 |https://simsage.ai/_assets/img/graphics/why-1.png                                     |simsage web|5357  |    |            |                                               |
-|75 |https://simsage.ai/_assets/svg/graphics/uc-find-send-100.jpg                          |simsage web|148264|    |            |98,76,77,78,79,80,81,82,83,88,89,90,91,92,93,94|
-|76 |https://simsage.ai/_assets/svg/graphics/uc-improve-service-100.jpg                    |simsage web|86241 |    |            |98,75,77,78,79,80,81,82,83,88,89,90,91,92,93,94|
-|77 |https://simsage.ai/_assets/svg/graphics/uc-quickly-and-easily-100.jpg                 |simsage web|102602|    |            |98,75,76,78,79,80,81,82,83,88,89,90,91,92,93,94|
-

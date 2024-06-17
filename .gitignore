@@ -4,4 +4,6 @@ venv
 out
 *.csv
 *.parquet
+__pycache__/
+raw-data
 
