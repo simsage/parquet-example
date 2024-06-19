@@ -33,13 +33,14 @@ spark.conf.set("spark.sql.debug.maxToStringFields", 1000)
 
 df = spark.read.parquet(in_file_name)
 df.createOrReplaceTempView("parquetTable")
-df.write.option("header", False).csv(out_file_path)
+df.write.option("header", True).csv(out_file_path)
 
 # if we had success, rename the files in the output folder (customer name) to 1,2,3.. csv
 success_file = "{}/_SUCCESS".format(out_file_path)
 if os.path.exists(success_file):
     print("found {}, copying CSV data into {}.csv".format(success_file, customer))
     csv_files = [os.path.join(out_file_path, f) for f in os.listdir(out_file_path) if os.path.isfile(os.path.join(out_file_path, f)) and f.startswith("part-") and f.endswith(".csv")]
+    csv_files.sort()
     with open("{}.csv".format(customer), "wt") as writer:
         for file in csv_files:
             print("copying {}".format(file))
