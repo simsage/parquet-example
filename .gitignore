@@ -6,4 +6,6 @@ out
 *.parquet
 __pycache__/
 raw-data
+.python-version
+sjic/
 
