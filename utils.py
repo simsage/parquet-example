@@ -75,6 +75,9 @@ def create_reports(input_file):
                     header_counter += 1
                 continue
 
+            if len(l) < col_similar:
+                continue
+
             item_id = l[0] # the SimSage id of this item
             item_url = l[1]
             path = '/'.join(item_url.split("/")[0:-1])
