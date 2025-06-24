@@ -1,6 +1,7 @@
 import pandas as pd
 import psycopg2
 from psycopg2 import sql
+import math
 
 def get_postgres_type(pandas_type):
     """Maps pandas dtype to PostgreSQL data type."""
@@ -21,22 +22,25 @@ def get_postgres_type(pandas_type):
     else:
         return "TEXT" # Default for other types
 
-def parquet_to_postgres(parquet_file_path, db_params, schema_name, table_name):
+def parquet_to_postgres_batched(parquet_file_path, db_params, table_name, chunk_size=1000):
     """
     Reads a Parquet file, creates a schema and table in PostgreSQL,
-    and inserts the data.
+    and inserts the data in batches.
 
     Args:
         parquet_file_path (str): The path to the Parquet file.
         db_params (dict): A dictionary with database connection parameters.
-        schema_name (str): The name of the schema to create.
         table_name (str): The name of the table to create.
+        chunk_size (int): The number of records to insert per batch.
     """
+    conn = None
+    cursor = None
     try:
         # Step 1: Read Parquet file into a pandas DataFrame
         print(f"Reading Parquet file from: {parquet_file_path}")
         df = pd.read_parquet(parquet_file_path)
         print("Parquet file read successfully.")
+        print(f"Total records to insert: {len(df)}")
         print("\nDataFrame Info:")
         df.info()
 
@@ -45,15 +49,6 @@ def parquet_to_postgres(parquet_file_path, db_params, schema_name, table_name):
         conn = psycopg2.connect(**db_params)
         cursor = conn.cursor()
         print("Database connection successful.")
-
-        # # Step 3: Create the schema if it doesn't exist
-        # print(f"Creating schema '{schema_name}' if it doesn't exist...")
-        # create_schema_query = sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
-        #     sql.Identifier(schema_name)
-        # )
-        # cursor.execute(create_schema_query)
-        # print(f"Schema '{schema_name}' is ready.")
-        #
 
         # Step 4: Dynamically generate the CREATE TABLE statement
         print(f"Generating CREATE TABLE statement for '{table_name}'...")
@@ -79,8 +74,8 @@ def parquet_to_postgres(parquet_file_path, db_params, schema_name, table_name):
         cursor.execute(create_table_query)
         print(f"Table '{table_name}' created successfully.")
 
-        # Step 5: Insert data from the DataFrame into the table
-        print(f"Inserting data into '{table_name}'...")
+        # Step 5: Insert data in batches
+        print(f"\nStarting data insertion in batches of {chunk_size}...")
         
         # Prepare the INSERT statement
         insert_query = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
@@ -89,20 +84,26 @@ def parquet_to_postgres(parquet_file_path, db_params, schema_name, table_name):
             sql.SQL(", ").join(sql.Placeholder() * len(df.columns))
         )
 
-        # Convert DataFrame to list of tuples for insertion
-        df_first_1000 = df.head(1000)
-        data_to_insert = [tuple(x) for x in df_first_1000.to_numpy()]
+        # Iterate over the DataFrame in chunks
+        total_chunks = math.ceil(len(df) / chunk_size)
+        for i in range(0, len(df), chunk_size):
+            chunk_df = df.iloc[i:i + chunk_size]
+            
+            # Convert chunk to list of tuples for insertion
+            data_to_insert = [tuple(x) for x in chunk_df.to_numpy()]
+            
+            # Execute the insert statement for the chunk
+            cursor.executemany(insert_query, data_to_insert)
+            
+            current_chunk_num = (i // chunk_size) + 1
+            print(f"Inserted chunk {current_chunk_num} of {total_chunks} ({len(data_to_insert)} records)")
 
-        # Execute the insert statement for all rows
-        cursor.executemany(insert_query, data_to_insert)
-        print(f"{len(data_to_insert)} rows inserted successfully.")
-
-        # Commit the transaction
+        # Commit the entire transaction
         conn.commit()
-        print("Transaction committed.")
+        print("\nAll batches inserted successfully. Transaction committed.")
 
     except (Exception, psycopg2.Error) as error:
-        print(f"Error while connecting to PostgreSQL or processing file: {error}")
+        print(f"\nError while connecting to PostgreSQL or processing file: {error}")
         if conn:
             conn.rollback()
             print("Transaction rolled back.")
@@ -118,23 +119,21 @@ if __name__ == "__main__":
     # --- Configuration ---
     
     # Path to your Parquet file
-    # On your local machine, this could be e.g., "C:/Users/YourUser/Downloads/data.parquet"
-    # Make sure to create a dummy parquet file for testing.
     PARQUET_PATH = "sjic_knowledge_base-summary-2024-6-19.parquet"
     
     # PostgreSQL connection details
-    # IMPORTANT: Replace with your actual database credentials.
     DB_CONNECTION_PARAMS = {
         "host": "localhost",
-        "database": "rock",
-        "user": "rock",
-        "password": "Password1"
+        "database": "parquet_store",
+        "user": "simsage",
+        "password": "mypassword"
     }
 
-    # Desired schema and table name in PostgreSQL
-    SCHEMA = "public"
-    TABLE = "parquet_data"
+    # Desired table name in PostgreSQL
+    TABLE = "data"
+    
+    # Records per batch
+    BATCH_SIZE = 1000
 
     # --- Run the main function ---
-    parquet_to_postgres(PARQUET_PATH, DB_CONNECTION_PARAMS, SCHEMA, TABLE)
-
+    parquet_to_postgres_batched(PARQUET_PATH, DB_CONNECTION_PARAMS, TABLE, chunk_size=BATCH_SIZE)
