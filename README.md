@@ -19,6 +19,7 @@ and the `/path/to/parquet-file.parquet` location of your parquet file.
 
 ```bash
 # to convert your parquet file at /path/to/file.parquet
+# NB. python3 might just be called python on your system
 python3 generate_reports.py customer /path/to/file.parquet
 
 # using the data included
