@@ -4,12 +4,7 @@ This project is written for python 3, any modern version of python 3 should work
 
 Parquet is a file format for big data.  Apache Spark is a powerful technology that puts a complete SQL-99 compatible interface around a single parquet file.
 
-install `pySpark`
-```bash
-python3 -m pip install pyspark
-```
-
-or using a virtual environment and the `requirements.txt` file.
+using a virtual environment and the `requirements.txt` file.
 
 ```bash
 virtualenv venv
