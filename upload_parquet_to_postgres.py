@@ -119,7 +119,7 @@ if __name__ == "__main__":
     # --- Configuration ---
     
     # Path to your Parquet file
-    PARQUET_PATH = "sjic_knowledge_base-summary-2024-6-19.parquet"
+    PARQUET_PATH = "demo_knowledge_base-summary-2023-4-26.parquet"
     
     # PostgreSQL connection details
     DB_CONNECTION_PARAMS = {

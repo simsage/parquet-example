@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# small demo sample for opening a parquet spark file and performing a SQL-99 query on it
+# Demo for opening a parquet spark file and performing a SQL-99 query on it
 #
 
 import pyspark

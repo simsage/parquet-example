@@ -1,21 +1,15 @@
-## pySpark demo
-This is a pySpark demo, showing how to read a SimSage parquet file using python.
-This project is written for python 3, at the time of writing python 3.11, however any modern version of python 3 should work.
+## pySpark
+This how to use pySpark with SimSage exports.  How to read a SimSage parquet file using python.
+This project is written for python 3, any modern version of python 3 should work.
 
 Parquet is a file format for big data.  Apache Spark is a powerful technology that puts a complete SQL-99 compatible interface around a single parquet file.
-
-## set up
-Create a virtual-environment (good practise but not required) or a folder for your project.
-Then install pySpark like so (using python 3) inside this project folder.
-
-#### this section is optional
 
 install `pySpark`
 ```bash
 python3 -m pip install pyspark
 ```
 
-or using a virtual environment
+or using a virtual environment and the `requirements.txt` file.
 
 ```bash
 virtualenv venv
@@ -23,8 +17,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## converting your parquet file to a csv file
-run `generate_reports.py` to convert the entire contents of your parquet file to a `csv` file with reporting.
+## convert a Parquet file to a CSV file
+Run `generate_reports.py` to convert the entire contents of your parquet file to a `csv` file with reporting.
 This takes two parameters, a `customer_name` that is used for the name of the reports and a temporary folder for writing into,
 and the `/path/to/parquet-file.parquet` location of your parquet file.
 
@@ -35,6 +29,16 @@ python3 generate_reports.py customer /path/to/file.parquet
 # using the data included
 python3 generate_reports.py demo index-demo_knowledge_base-summary-2023-1-16.parquet
 ```
+
+#### The files
+
+| filename                      | description                                                                           |
+|-------------------------------|---------------------------------------------------------------------------------------|
+| generate_reports.py           | Generate a series of CSV files from a parquet file (see below)                        |
+| utils.py                      | Helper utilities for generate_reports.py                                              |
+| query_example.py              | A sample SQL 99 query on a parquet file                                               |
+| upload_parquet_to_postgres.py | use Pandas and PsyCopg2 to upload data from a parquet file into a Postgres SQL server |
+
 
 #### The reports
 
