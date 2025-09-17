@@ -11,9 +11,15 @@ Then install pySpark like so (using python 3) inside this project folder.
 pySpark requires Java to be installed.  We recommend you install the free OpenJDK (or OpenJRE)
 
 ```bash
+# make sure your system is up-to-date
 sudo apt update
 sudo apt upgrade -yqq
+
+# install the open-jdk
 sudo apt install openjdk-17-jdk
+
+# verify installation
+java --version
 ```
 
 #### this section is optional
