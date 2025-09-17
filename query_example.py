@@ -25,5 +25,5 @@ parDF1.printSchema()
 
 # get the SimSage id, full_path (remote location), SimSage source name, the size of the data, a list of very similar items (set on source as a threshold), and identical items
 query2 = spark.sql("select id, full_path, source, size, acls, very_similar, identical from ParquetTable order by id")
-number_of_rows_to_show = 10_000
+number_of_rows_to_show = 10
 query2.show(number_of_rows_to_show, truncate=False)
