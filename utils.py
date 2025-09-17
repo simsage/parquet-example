@@ -62,157 +62,159 @@ def create_reports(input_file):
     url_lookup = dict()
 
     counter = 0
-    with open(input_file, 'rt') as reader:
-        for l in  csv.reader(reader, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True):
-            
-            counter += 1
-            if counter == 1:
-                # process header
-                header_counter = 0
-                for item in l:
-                    if item in pii_data:
-                        pii_data[item]['col'] = header_counter
-                    header_counter += 1
-                continue
-
-            if len(l) < col_similar:
-                continue
-
-            item_id = l[0] # the SimSage id of this item
-            item_url = l[1]
-            path = '/'.join(item_url.split("/")[0:-1])
-            # record the different paths, skipping zip files
-            if len(path) > 0 and path not in location_dictionary and ":::" not in path:
-                location_dictionary[path] = True
-
-            url_lookup[item_id] = item_url  # id -> url
-            extn = l[col_extn]
-            sub_type = l[col_type]
-            c_created = l[col_created]
-            if c_created == "created":
-                continue
-            c_lastmod = l[col_lastmod]
-            created = 0
-            if len(c_created) > 0:
-                try:
-                    created = int(c_created)
-                except ValueError:
+    with (open(input_file, 'rt', encoding='utf-8-sig') as reader):
+        for line in reader:
+            line = line.replace('\0', '')
+            rows = csv.reader([line], quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)
+            for l in rows:
+                counter += 1
+                if counter == 1:
+                    # process header
+                    header_counter = 0
+                    for item in l:
+                        if item in pii_data:
+                            pii_data[item]['col'] = header_counter
+                        header_counter += 1
                     continue
-            last_mod = 0
-            if len(c_lastmod) > 0:
-                try:
-                    last_mod = int(c_lastmod)
-                except ValueError:
-                    continue
-            try:
-                byte_size = int(l[col_size])
-            except ValueError:
-                continue
 
-            # for PII collection, gather data
-            for key in pii_data:
-                col = pii_data[key]['col']
-                name = pii_data[key]['name']
-                if col > 0 and col < len(l):
+                if len(l) < col_similar:
+                    continue
+
+                item_id = l[0] # the SimSage id of this item
+                item_url = l[1]
+                path = '/'.join(item_url.split("/")[0:-1])
+                # record the different paths, skipping zip files
+                if len(path) > 0 and path not in location_dictionary and ":::" not in path:
+                    location_dictionary[path] = True
+
+                url_lookup[item_id] = item_url  # id -> url
+                extn = l[col_extn]
+                sub_type = l[col_type]
+                c_created = l[col_created]
+                if c_created == "created":
+                    continue
+                c_lastmod = l[col_lastmod]
+                created = 0
+                if len(c_created) > 0:
                     try:
-                        value = int(l[col])
-                        if value > 0:
-                            if name in pii_dictionary:
-                                pii_dictionary[name] += value
-                            else:
-                                pii_dictionary[name] = value
-
-                            # and collect WHAT document has this data
-                            if name in pii_document_map:
-                                pii_document_map[name].append(item_url)
-                            else:
-                                pii_document_map[name] = [item_url]
-
+                        created = int(c_created)
                     except ValueError:
-                        pass
-
-            acls = l[col_acls].split(",")
-            content_hash = l[col_cont_hash]
-            similar = l[col_similar].split(",")
-
-            # gather information by document extension type
-            if len(extn) == 0:
-                extn = 'unknown'
-            if len(sub_type) == 0:
-                sub_type = "unknown"
-            if extn in type_dictionary:
-                existing = type_dictionary[extn]
-            else:
-                existing = {"sub_type_set": {}, "byte_size": 0, "oldest": 0, "newest": 0}
-            if sub_type in existing["sub_type_set"]:
-                existing["sub_type_set"][sub_type] += 1
-            else:
-                existing["sub_type_set"][sub_type] = 1
-
-            if created > 0 and last_mod > 0:
-                oldest = created
-                newest = last_mod
-                if existing["oldest"] == 0 or existing["oldest"] > oldest:
-                    existing["oldest"] = oldest
-                if existing["newest"] == 0 or existing["newest"] < newest:
-                    existing["newest"] = newest
-            existing["byte_size"] += byte_size
-            type_dictionary[extn] = existing
-
-            # gather security data (acl distributions)
-            for hv in acls:
-                parts = hv.split(":")
-                if len(parts) == 2:
-                    access = parts[1].upper()
-                    who = parts[0].lower()
-                    if access not in sec_dictionary:
-                        sec_dictionary[access] = {}
-                    if who in sec_dictionary[access]:
-                        sec_dictionary[access][who] += 1
-                    else:
-                        sec_dictionary[access][who] = 1
-
-            # gather similar documents
-            if len(similar) > 0 and len(similar[0]) > 0:
-                for item in similar:
-                    parts = item.split("@")
-                    similar_list = [item_id]
-                    if len(parts) == 2:
-                        similar_id = parts[0]
-                        percentage = parts[1]
-                        # take the smallest of the two ids
-                        first_id = int(item_id)
-                        second_id = int(similar_id)
-                        if second_id < first_id:
-                            first_id = int(similar_id)
-                            second_id = int(item_id)
-                        key = "{}:{}".format(str(first_id), str(second_id))
-                        if key not in sim_dictionary and first_id != second_id:
-                            sim_dictionary[key] = percentage
-
-            if len(content_hash) > 0:
-                if content_hash not in identical_dictionary:
-                    identical_dictionary[content_hash] = []
-                identical_dictionary[content_hash].append(item_id)
-
-    # set up the identical items inside the sim dictionary
-    duplicates_seen = dict()
-    for item in identical_dictionary:
-        values = identical_dictionary[item]
-        if len(values) > 1:
-            for i in values:
-                for j in values:
-                    if i == j:
                         continue
-                    first_id = int(i)
-                    second_id = int(j)
-                    if second_id < first_id:
-                        first_id = int(j)
-                        second_id = int(i)
-                    key = "{}:{}".format(str(first_id), str(second_id))
-                    if key not in duplicates_seen and first_id != second_id:
-                        duplicates_seen[key] = True
-                        sim_dictionary[key] = '1.0'
+                last_mod = 0
+                if len(c_lastmod) > 0:
+                    try:
+                        last_mod = int(c_lastmod)
+                    except ValueError:
+                        continue
+                try:
+                    byte_size = int(l[col_size])
+                except ValueError:
+                    continue
+
+                # for PII collection, gather data
+                for key in pii_data:
+                    col = pii_data[key]['col']
+                    name = pii_data[key]['name']
+                    if col > 0 and col < len(l):
+                        try:
+                            value = int(l[col])
+                            if value > 0:
+                                if name in pii_dictionary:
+                                    pii_dictionary[name] += value
+                                else:
+                                    pii_dictionary[name] = value
+
+                                # and collect WHAT document has this data
+                                if name in pii_document_map:
+                                    pii_document_map[name].append(item_url)
+                                else:
+                                    pii_document_map[name] = [item_url]
+
+                        except ValueError:
+                            pass
+
+                acls = l[col_acls].split(",")
+                content_hash = l[col_cont_hash]
+                similar = l[col_similar].split(",")
+
+                # gather information by document extension type
+                if len(extn) == 0:
+                    extn = 'unknown'
+                if len(sub_type) == 0:
+                    sub_type = "unknown"
+                if extn in type_dictionary:
+                    existing = type_dictionary[extn]
+                else:
+                    existing = {"sub_type_set": {}, "byte_size": 0, "oldest": 0, "newest": 0}
+                if sub_type in existing["sub_type_set"]:
+                    existing["sub_type_set"][sub_type] += 1
+                else:
+                    existing["sub_type_set"][sub_type] = 1
+
+                if created > 0 and last_mod > 0:
+                    oldest = created
+                    newest = last_mod
+                    if existing["oldest"] == 0 or existing["oldest"] > oldest:
+                        existing["oldest"] = oldest
+                    if existing["newest"] == 0 or existing["newest"] < newest:
+                        existing["newest"] = newest
+                existing["byte_size"] += byte_size
+                type_dictionary[extn] = existing
+
+                # gather security data (acl distributions)
+                for hv in acls:
+                    parts = hv.split(":")
+                    if len(parts) == 2:
+                        access = parts[1].upper()
+                        who = parts[0].lower()
+                        if access not in sec_dictionary:
+                            sec_dictionary[access] = {}
+                        if who in sec_dictionary[access]:
+                            sec_dictionary[access][who] += 1
+                        else:
+                            sec_dictionary[access][who] = 1
+
+                # gather similar documents
+                if len(similar) > 0 and len(similar[0]) > 0:
+                    for item in similar:
+                        parts = item.split("@")
+                        similar_list = [item_id]
+                        if len(parts) == 2:
+                            similar_id = parts[0]
+                            percentage = parts[1]
+                            # take the smallest of the two ids
+                            first_id = int(item_id)
+                            second_id = int(similar_id)
+                            if second_id < first_id:
+                                first_id = int(similar_id)
+                                second_id = int(item_id)
+                            key = "{}:{}".format(str(first_id), str(second_id))
+                            if key not in sim_dictionary and first_id != second_id:
+                                sim_dictionary[key] = percentage
+
+                if len(content_hash) > 0:
+                    if content_hash not in identical_dictionary:
+                        identical_dictionary[content_hash] = []
+                    identical_dictionary[content_hash].append(item_id)
+
+        # set up the identical items inside the sim dictionary
+        duplicates_seen = dict()
+        for item in identical_dictionary:
+            values = identical_dictionary[item]
+            if len(values) > 1:
+                for i in values:
+                    for j in values:
+                        if i == j:
+                            continue
+                        first_id = int(i)
+                        second_id = int(j)
+                        if second_id < first_id:
+                            first_id = int(j)
+                            second_id = int(i)
+                        key = "{}:{}".format(str(first_id), str(second_id))
+                        if key not in duplicates_seen and first_id != second_id:
+                            duplicates_seen[key] = True
+                            sim_dictionary[key] = '1.0'
 
     # output the data so it can be processed
 
