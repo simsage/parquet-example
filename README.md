@@ -8,6 +8,14 @@ Parquet is a file format for big data.  Apache Spark is a powerful technology th
 Create a virtual-environment (good practise but not required) or a folder for your project.
 Then install pySpark like so (using python 3) inside this project folder.
 
+pySpark requires Java to be installed.  We recommend you install the free OpenJDK (or OpenJRE)
+
+```bash
+sudo apt update
+sudo apt upgrade -yqq
+sudo apt install openjdk-17-jdk
+```
+
 #### this section is optional
 
 install `pySpark`
