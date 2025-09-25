@@ -22,12 +22,12 @@ csv.field_size_limit(sys.maxsize)
 
 col_type = 6
 col_extn = 7
-col_created = 8
-col_lastmod = 9
-col_cont_hash = 10
-col_size = 11
-col_acls = 12
-col_similar = 13
+col_created = 9
+col_lastmod = 10
+col_cont_hash = 11
+col_size = 12
+col_acls = 13
+col_similar = 15
 
 # pii
 pii_data = {'credit_card_count': {'col': 0, 'name': 'credit cards'},
